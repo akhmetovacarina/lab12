@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ахметова К.Р.</title>
+</head>
+<body>
+    <label>Выбор страницы:</label><br>
+    <select id="example">
+        <option value="example1/index.html">Вариант А</option>
+        <option value="example2/index.html">Вариант Б</option>
+    </select>
+    <input type="button" value="Открыть" onclick="openDoc()">
+    <br><br>
+
+    <label>Результат:</label><br>
+    <textarea id="designResult" style='width: 400px; height: 15px'></textarea>
+    <br><br>
+
+    <label>  </label><br>
+    <iframe id="openDoc" style="width: 100%; height: 670px"></iframe>
+    <br>
+    <script>
+        function openDoc() {
+  //получаем iframe и устанавливаем значение src
+  let frame = document.getElementById("openDoc");
+  frame.src = document.getElementById("example").value;
+  //устанавливаем колбэк для проверки дизайна сайта после загрузки iframe
+  frame.onload = documentReview;
+}
+
+//функция для проверки дизайна сайта
+function documentReview() {
+  let userDoc = document.getElementById("openDoc");
+  let userElements = Array.from(userDoc.contentWindow.document.querySelectorAll('body *'));
+  userElements.push(userDoc.contentWindow.document.querySelector('body'));
+
+  let resultTextArea = document.getElementById('designResult');
+  let disRevResult = designReview(userElements);
+  resultTextArea.value = disRevResult;
+  resultTextArea.style.height = `${disRevResult.length * 0.4 + 5}px`;
+}
+
+//функция для проверки пунктов дизайна сайта
+function designReview(elements) {
+  let p1 = firstPointCheck(elements); //цвет фона
+  let p2 = secondPointCheck(elements); //цвет текста
+  let p3 = thirdPointCheck(elements); //ширина абзацев
+  let p4 = fourthPointCheck(elements); //цвет элементов
+  let p5 = fifthPointCheck(elements); //рамка у блока и ширина изображения
+
+  let score = 0;
+  if (p1) score += 0.2;
+  if (p2) score += 0.2;
+  if (p3) score += 0.2;
+  if (p4) score += 0.2;
+  if (p5) score += 0.2;
+
+  //создаем отчет по выполненным пунктам
+  let report = `Задание выполнено на ${Math.round(score * 100)}%;`;
+  if (!p1) report += '\nНайдено несоответствие по цвету фона';
+  if (!p2) report += '\nНайдено несоответствие по цвету текста';
+  if (!p3) report += '\nНайдено несоответствие по ширине абзацев';
+  if (!p4) report += '\nНайдено несоответствие по цвету остальных элементов';
+  if (!p5) report += '\nНайдено несоответствие по рамке блока и/или ширине изображения';
+
+  return report;
+}
+
+  //цвет фона
+function firstPointCheck(elements) {
+  let ret = false;
+  elements.forEach(element => {
+    let style = window.getComputedStyle(element);
+    if (style.backgroundColor === '#333333' || style.backgroundColor === 'rgb(51, 51, 51)') {
+      ret = true;
+    }
+  });
+  return ret;
+}
+
+  //цвет текста
+function secondPointCheck(elements) {
+  let ret = false;
+  elements.forEach(element => {
+    if ((element.tagName === 'BODY') || (element.tagName === 'H1') || (element.tagName === 'P')) {
+      let style = window.getComputedStyle(element);
+      if (style.color === 'white' || style.color === 'rgb(255, 255, 255)') {
+        ret = true;
+      }
+    }
+  });
+  return ret;
+}
+
+
+ //ширина абзацев
+function thirdPointCheck(elements) {
+  let ret = false;
+  elements.forEach(element => {
+    if (element.tagName === 'P') {
+      let style = window.getComputedStyle(element);
+      let width = parseInt(style.width);
+      if ((width % 10 === 0) && (width < 500)) ret = true;
+    }
+  });
+  return ret;
+}
+
+ //цвет остальных элементов
+function fourthPointCheck(elements) {
+  let ret = false;
+  elements.forEach(element => {
+    if ((element.tagName !== 'BODY') && (element.tagName !== 'H1') && (element.tagName !== 'P')) {
+      let style = window.getComputedStyle(element);
+      if (style.color === 'orange' || style.color === 'rgb(255, 165, 0)') {
+        ret = true;
+      }
+    }
+  });
+  return ret;
+}
+//рамка у блока и ширина изображения
+function fifthPointCheck(elements) {
+            let divSelector = false;
+            let imgSelector = false;
+            elements.forEach(element => {
+                let style = window.getComputedStyle(element);
+                if ((element.className === 'NEW') && (style.border === '5px solid rgb(255, 165, 0)')) divSelector = true;
+                if ((element.tagName === 'IMG') && (style.marginRight === '10px') && (style.verticalAlign === 'top') && (style.borderRadius === '20px')) imgSelector = true;
+            });
+            return (divSelector && imgSelector) ? true : false;
+        }
+    </script>
+</body>
+</html>
